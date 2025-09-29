@@ -2,9 +2,11 @@ import Script from 'next/script';
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import "@rainbow-me/rainbowkit/styles.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import SiteHeader from "@/components/site-header";
 import Footer from "@/components/footer";
+import { Providers } from "@/app/providers";
 
 const jetBrainsMono = JetBrains_Mono({ subsets: ["latin"] });
 
@@ -58,11 +60,13 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <main className="flex flex-col gap-12 items-center p-6 md:p-10 pb-12">
-              <SiteHeader />
-              {children}
-              <Footer />
-            </main>
+            <Providers>
+              <main className="flex flex-col gap-12 items-center p-6 md:p-10 pb-12">
+                <SiteHeader />
+                {children}
+                <Footer />
+              </main>
+            </Providers>
           </ThemeProvider>
       </body>
     </html>

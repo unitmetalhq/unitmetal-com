@@ -5,8 +5,8 @@ export default function Home() {
   const menuItems = [
     {
       id: 1,
-      name: 'Go to app',
-      url: '/app'
+      name: 'Swap',
+      url: '/swap'
     },
     {
       id: 2,
@@ -24,7 +24,7 @@ export default function Home() {
     {
       keyboard: '1',
       description: 'Sections',
-      url: '/app'
+      url: '/swap'
     },
     {
       keyboard: '2',
@@ -48,7 +48,6 @@ export default function Home() {
         <h1 className="text-xl md:text-3xl font-bold">Professional Interface for DeFi</h1>
         <div className="flex flex-col gap-12 mt-4">
           <p className="text-md">High quality, open source, local first interface for DeFi users. Swap, provide liquidity and explore yield opportunities.</p>
-          <p className="text-md">Founded upon the freedom software movement ethos of transparency, collaboration, and empowerment.</p>
         </div>
       </div>
       <div className="flex flex-col border-2 border-primary gap-2 pb-8">
