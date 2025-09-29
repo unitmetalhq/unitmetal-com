@@ -3,8 +3,8 @@ import {
   GetSwapRouteResponse,
   PostSwapRouteForEncodedDataParams,
   PostSwapRouteForEncodedDataResponse,
-} from "@/lib/buildswap/types";
-import { API_ROUTES, KYBERSWAP_BASE_URL } from "@/lib/buildswap/constants";
+} from "@/lib/buildSwap/types";
+import { API_ROUTES, KYBERSWAP_BASE_URL } from "@/lib/buildSwap/constants";
 
 export class KyberSwap {
   private clientId: string;
