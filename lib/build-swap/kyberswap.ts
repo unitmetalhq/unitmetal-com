@@ -3,8 +3,8 @@ import {
   GetSwapRouteResponse,
   PostSwapRouteForEncodedDataParams,
   PostSwapRouteForEncodedDataResponse,
-} from "@/lib/buildSwap/types";
-import { API_ROUTES, KYBERSWAP_BASE_URL } from "@/lib/buildSwap/constants";
+} from "@/lib/build-swap/types";
+import { API_ROUTES, KYBERSWAP_BASE_URL } from "@/lib/build-swap/constants";
 
 export class KyberSwap {
   private clientId: string;
@@ -19,6 +19,7 @@ export class KyberSwap {
     obj: Record<string, any>
   ): string {
     return Object.entries(obj)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .filter(([_, value]) => value !== undefined)
       .map(([key, value]) => {
         if (Array.isArray(value)) {
