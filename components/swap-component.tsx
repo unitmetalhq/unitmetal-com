@@ -32,7 +32,7 @@ import SwapSourceComponent from "@/components/swap-source-component";
 import TransactionStatusComponent from "@/components/transaction-status-component";
 import { tokenList } from "@/lib/tokenList";
 import { chainList } from "@/lib/chainList";
-import { NATIVE_TOKEN_ADDRESS } from "@/lib/buildSwap/constants";
+
 
 export default function SwapComponent() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -65,7 +65,7 @@ export default function SwapComponent() {
   const tokenInList = useMemo(
     () =>
       chainAllTokens.filter((token) => {
-        const isNotETH = token.address !== NATIVE_TOKEN_ADDRESS;
+        const isNotETH = token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         const isNotSelectedTokenOut =
           !form.state.values.tokenOut ||
           token.address !== form.state.values.tokenOut.split(":")[0];
@@ -78,7 +78,7 @@ export default function SwapComponent() {
   const tokenOutList = useMemo(
     () =>
       chainAllTokens.filter((token) => {
-        const isNotETH = token.address !== NATIVE_TOKEN_ADDRESS;
+        const isNotETH = token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         const isNotSelectedTokenIn =
           !form.state.values.tokenIn ||
           token.address !== form.state.values.tokenIn.split(":")[0];
@@ -372,7 +372,7 @@ export default function SwapComponent() {
                                     ) {
                                       form.setFieldValue(
                                         "tokenIn",
-                                        `${NATIVE_TOKEN_ADDRESS}:ETH`
+                                        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH"
                                       );
                                     }
                                     setTokenOutDialogOpen(false);
