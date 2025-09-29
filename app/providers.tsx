@@ -6,7 +6,7 @@ import {
   getDefaultWallets,
   getDefaultConfig,
 } from "@rainbow-me/rainbowkit";
-import { trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/wallets";
+import { injectedWallet, trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/wallets";
 import { mainnet, arbitrum, base, unichain } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, http } from "wagmi";
@@ -18,6 +18,10 @@ const config = getDefaultConfig({
   appName: "UnitMetal", // Name your app
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!, // Enter your WalletConnect Project ID here
   wallets: [
+    {
+      groupName: "Injected",
+      wallets: [injectedWallet],
+    },
     ...wallets,
     {
       groupName: "Other",
