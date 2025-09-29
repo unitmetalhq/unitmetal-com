@@ -43,7 +43,7 @@ export default function SwapComponent() {
       amountIn: "",
       amountOut: "",
       chain: "1:ethereum:Ethereum",
-      tokenIn: `${NATIVE_TOKEN_ADDRESS}:ETH`,
+      tokenIn: `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH`,
       tokenOut: "",
       slippage: "0.1",
     },
