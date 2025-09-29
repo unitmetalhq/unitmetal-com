@@ -7,7 +7,7 @@ import {
   getDefaultConfig,
 } from "@rainbow-me/rainbowkit";
 import { trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/wallets";
-import { sepolia, baseSepolia, base, arbitrumSepolia, arbitrum } from "wagmi/chains";
+import { mainnet, arbitrum, base, unichain } from "wagmi/chains";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, http } from "wagmi";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -24,13 +24,12 @@ const config = getDefaultConfig({
       wallets: [trustWallet, ledgerWallet],
     },
   ],
-  chains: [sepolia, baseSepolia, arbitrumSepolia, base, arbitrum],
+  chains: [mainnet, base, arbitrum, unichain],
   transports: {
-    [sepolia.id]: http(process.env.NEXT_PUBLIC_RPC_URL_SEPOLIA!),
-    [baseSepolia.id]: http(process.env.NEXT_PUBLIC_RPC_URL_BASE_SEPOLIA!),
-    [arbitrumSepolia.id]: http(process.env.NEXT_PUBLIC_RPC_URL_ARBITRUM_SEPOLIA!),
+    [mainnet.id]: http(process.env.NEXT_PUBLIC_RPC_URL_ETHEREUM!),
     [base.id]: http(process.env.NEXT_PUBLIC_RPC_URL_BASE!),
     [arbitrum.id]: http(process.env.NEXT_PUBLIC_RPC_URL_ARBITRUM!),
+    [unichain.id]: http(process.env.NEXT_PUBLIC_RPC_URL_UNICHAIN!),
   },
   ssr: true, // Because it is Nextjs's App router, you need to declare ssr as true
 });

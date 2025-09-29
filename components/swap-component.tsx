@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatUnits, parseUnits, parseEther } from "viem";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,8 +27,10 @@ import {
 } from "lucide-react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -85,112 +88,232 @@ export default function SwapComponent() {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            {/* A type-safe field component*/}
-            <form.Field
-              name="amountIn"
-              validators={{
-                onChange: ({ value }) =>
-                  !value
-                    ? "Please enter an amount to mint"
-                    : parseEther(value) < 0
-                    ? "Amount must be greater than 0"
-                    : undefined,
-              }}
-            >
-              {(field) => (
+          <Tabs defaultValue="sell" className="w-full">
+            <TabsList className="border-primary border-1 rounded-none">
+              <TabsTrigger className="rounded-none" value="sell">
+                Sell
+              </TabsTrigger>
+              <TabsTrigger className="rounded-none" value="buy">
+                Buy
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="sell" className="flex flex-col gap-4">
+              {/* sell form*/}
+              <div>
+                <form.Field
+                  name="amountIn"
+                  validators={{
+                    onChange: ({ value }) =>
+                      !value
+                        ? "Please enter an amount to mint"
+                        : parseEther(value) < 0
+                        ? "Amount must be greater than 0"
+                        : undefined,
+                  }}
+                >
+                  {(field) => (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <p className="text-muted-foreground">You sell</p>
+                        <div className="flex flex-row gap-4">
+                          <button className="hover:cursor-pointer underline underline-offset-4">
+                            25%
+                          </button>
+                          <button className="hover:cursor-pointer underline underline-offset-4">
+                            50%
+                          </button>
+                          <button className="hover:cursor-pointer underline underline-offset-4">
+                            75%
+                          </button>
+                          <button className="hover:cursor-pointer underline underline-offset-4">
+                            Max
+                          </button>
+                        </div>
+                      </div>
+                      <div className="flex flex-row items-center justify-between my-4">
+                        {isDesktop ? (
+                          <input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value || ""}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            type="number"
+                            placeholder="0"
+                            required
+                          />
+                        ) : (
+                          <input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value || ""}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            type="number"
+                            inputMode="decimal"
+                            pattern="[0-9]*"
+                            placeholder="0"
+                            required
+                          />
+                        )}
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" className="rounded-none">ETH</Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Select a token</DialogTitle>
+                              <DialogDescription>
+                                Search and select a token to sell
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4">
+                              <div className="grid gap-3">
+                                <Label htmlFor="name-1">Name</Label>
+                              </div>
+                              <div className="grid gap-3">
+                                <Label htmlFor="username-1">Username</Label>
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                              </DialogClose>
+                              <Button type="submit">Save changes</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                      <FieldInfo field={field} />
+                    </div>
+                  )}
+                </form.Field>
+              </div>
+              <div>
+                {/* Output for sell form */}
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-row gap-2 items-center justify-between">
-                    <p className="text-muted-foreground">Sell</p>
-                    <button className="bg-transparent border border-muted-foreground text-muted-foreground rounded-md px-2 py-0.5 hover:cursor-pointer">
-                      Max
-                    </button>
+                    <p className="text-muted-foreground">You receive</p>
                   </div>
-                  <div className="flex flex-row gap-2">
+                  <div className="flex flex-row items-center justify-between my-4">
                     {isDesktop ? (
                       <input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value || ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        id="sellFormAmountOut"
+                        name="sellFormAmountOut"
+                        value=""
                         className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         type="number"
                         placeholder="0"
-                        required
+                        readOnly
                       />
                     ) : (
                       <input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value || ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        id="sellFormAmountOut"
+                        name="sellFormAmountOut"
+                        value=""
                         className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         type="number"
                         inputMode="decimal"
                         pattern="[0-9]*"
                         placeholder="0"
-                        required
+                        readOnly
                       />
                     )}
+                    <Button variant="outline" className="rounded-none">
+                      USDC
+                    </Button>
                   </div>
-                  <FieldInfo field={field} />
                 </div>
-              )}
-            </form.Field>
-          </div>
-          <div>
-            {/* A type-safe field component*/}
-            <form.Field
-              name="amountOut"
-              validators={{
-                onChange: ({ value }) =>
-                  !value
-                    ? "Please enter an amount to swap"
-                    : parseEther(value) < 0
-                    ? "Amount must be greater than 0"
-                    : undefined,
-              }}
-            >
-              {(field) => (
+              </div>
+            </TabsContent>
+            <TabsContent value="buy" className="flex flex-col gap-4">
+              <div>
+                {/* A type-safe field component*/}
+                <form.Field
+                  name="amountOut"
+                  validators={{
+                    onChange: ({ value }) =>
+                      !value
+                        ? "Please enter an amount to mint"
+                        : parseEther(value) < 0
+                        ? "Amount must be greater than 0"
+                        : undefined,
+                  }}
+                >
+                  {(field) => (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-row gap-2 items-center justify-between">
+                        <p className="text-muted-foreground">You buy</p>
+                        <button className="bg-transparent border border-muted-foreground text-muted-foreground rounded-md px-2 py-0.5 hover:cursor-pointer">
+                          Max
+                        </button>
+                      </div>
+                      <div className="flex flex-row gap-2">
+                        {isDesktop ? (
+                          <input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value || ""}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            type="number"
+                            placeholder="0"
+                            required
+                          />
+                        ) : (
+                          <input
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value || ""}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            type="number"
+                            inputMode="decimal"
+                            pattern="[0-9]*"
+                            placeholder="0"
+                            required
+                          />
+                        )}
+                      </div>
+                      <FieldInfo field={field} />
+                    </div>
+                  )}
+                </form.Field>
+              </div>
+              <div>
                 <div className="flex flex-col gap-2">
                   <div className="flex flex-row gap-2 items-center justify-between">
-                    <p className="text-muted-foreground">Buy</p>
-                    <button className="bg-transparent border border-muted-foreground text-muted-foreground rounded-md px-2 py-0.5 hover:cursor-pointer">
-                      Max
-                    </button>
+                    <p className="text-muted-foreground">You need</p>
                   </div>
                   <div className="flex flex-row gap-2">
                     {isDesktop ? (
                       <input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value || ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        id="buyFormAmountIn"
+                        name="buyFormAmountIn"
+                        value=""
                         className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         type="number"
                         placeholder="0"
-                        required
+                        readOnly
                       />
                     ) : (
                       <input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value || ""}
-                        onChange={(e) => field.handleChange(e.target.value)}
+                        id="buyFormAmountIn"
+                        name="buyFormAmountIn"
+                        value=""
                         className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         type="number"
                         inputMode="decimal"
                         pattern="[0-9]*"
                         placeholder="0"
-                        required
+                        readOnly
                       />
                     )}
                   </div>
-                  <FieldInfo field={field} />
                 </div>
-              )}
-            </form.Field>
-          </div>
+              </div>
+            </TabsContent>
+          </Tabs>
           <form.Subscribe
             selector={(state) => [state.canSubmit, state.isSubmitting]}
           >
@@ -199,10 +322,7 @@ export default function SwapComponent() {
                 size="lg"
                 className="hover:cursor-pointer text-lg font-bold rounded-none"
                 type="submit"
-                disabled={
-                  !canSubmit ||
-                  isSubmitting
-                }
+                disabled={!canSubmit || isSubmitting}
               >
                 {isSubmitting ? (
                   <>

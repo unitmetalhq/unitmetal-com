@@ -26,7 +26,7 @@ export default function Footer() {
             <div className="grid grid-cols-1 md:grid-cols-3 justify-between gap-6">
               <div className="flex flex-col gap-1">
                 <h3 className="scroll-m-20 text-lg font-semibold tracking-tight mb-2">Team</h3>
-                <Link href="/our-story" className="text-muted-foreground text-sm">Our story</Link>
+                <Link href="/about" className="text-muted-foreground text-sm">About</Link>
                 {/* <Link href="/treasury" className="text-muted-foreground text-sm">Treasury</Link>
                 <Link href="/contributors" className="text-muted-foreground text-sm">Contributors</Link> */}
               </div>
