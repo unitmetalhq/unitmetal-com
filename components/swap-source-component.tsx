@@ -8,30 +8,6 @@ const swapSources = [
     name: "Kyberswap",
     rank: 1,
   },
-  {
-    name: "1Inch",
-    rank: 2,
-  },
-  {
-    name: "Uniswap",
-    rank: 3,
-  },
-  {
-    name: "SushiSwap",
-    rank: 4,
-  },
-  {
-    name: "PancakeSwap",
-    rank: 5,
-  },
-  {
-    name: "Curve",
-    rank: 7,
-  },
-  {
-    name: "Balancer",
-    rank: 8,
-  },
 ];
 
 export default function SwapSourceComponent() {
@@ -43,9 +19,11 @@ export default function SwapSourceComponent() {
         <h1 className="text-lg md:text-xl font-bold">Sources</h1>
       </div>
       <div className="flex flex-col gap-2 px-4 py-2">
-        <p className="text-sm">Select a route to perform a swap. Best route is selected based on net output after gas fees.</p>
+        <p className="text-sm text-muted-foreground">
+          Select a route to perform a swap. Best route is selected based on net
+          output after gas fees.
+        </p>
       </div>
-
       {swapSources.map((source) => (
         <SwapSource
           key={source.name}
@@ -55,6 +33,13 @@ export default function SwapSourceComponent() {
           setSelectedSource={setSelectedSource}
         />
       ))}
+
+      <div className="flex flex-col gap-2 px-4 py-2">
+        <p className="text-sm text-muted-foreground">
+          We are working on adding more aggregators to our platform. Please stay
+          tuned.
+        </p>
+      </div>
     </div>
   );
 }
@@ -70,12 +55,17 @@ function SwapSource({
   selectedSource: string | null;
   setSelectedSource: (source: string | null) => void;
 }) {
+
+  function handleSelectedSource(name: string) {
+    setSelectedSource(selectedSource === name ? null : name);
+  }
+
   return (
     <div
       className={`flex flex-col justify-between items-center px-4 py-2 border-b border-primary w-full hover:cursor-pointer hover:bg-primary hover:text-secondary ${
         selectedSource === name ? "bg-primary text-secondary" : ""
       }`}
-      onClick={() => setSelectedSource(name)}
+      onClick={() => handleSelectedSource(name)}
     >
       <div className="flex flex-row items-start justify-between w-full">
         <div className="flex flex-col gap-2">
@@ -89,8 +79,14 @@ function SwapSource({
             <div>≈</div>
           </div>
         </div>
-        <div className="underline underline-offset-4">
-          {rank === 1 ? "Best" : rank}
+        <div
+          className={`border-l-1 border-r-2 border-t-1 border-b-2 px-1 py-0.5 rounded-none ${
+            selectedSource === name
+              ? "border-secondary text-secondary"
+              : "border-primary"
+          }`}
+        >
+          {rank}
         </div>
       </div>
       <div className="flex flex-row items-center justify-between w-full">
