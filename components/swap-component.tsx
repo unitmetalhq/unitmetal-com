@@ -14,7 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useChainId, useSwitchChain } from "wagmi";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { parseEther, parseUnits } from "viem";
+import { parseEther, parseUnits, formatUnits } from "viem";
 import { Button } from "@/components/ui/button";
 import { Loader2, OctagonAlert } from "lucide-react";
 import {
@@ -34,14 +34,19 @@ import { tokenList } from "@/lib/tokenList";
 import { chainList } from "@/lib/chainList";
 
 export default function SwapComponent() {
+  // detect desktop device
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  // check for chainId
   const chainId = useChainId();
+  // hook to switch chain
   const {
     switchChain,
     isPending: isSwitchChainPending,
     isError: isSwitchChainError,
   } = useSwitchChain();
+  // form to handle the swap
   const form = useForm({
+    // default values for the form
     defaultValues: {
       amountIn: "",
       amountOut: "",
@@ -50,6 +55,7 @@ export default function SwapComponent() {
       tokenOut: "",
       slippage: "0.1",
     },
+    // listeners for the form
     listeners: {
       onChange: ({ formApi }) => {
         // check if amountIn, tokenIn and tokenOut are valid
@@ -178,7 +184,7 @@ export default function SwapComponent() {
                       onChange: ({ value }) =>
                         !value
                           ? "Please enter an amount to swap"
-                          : parseEther(value) < 0
+                          : parseUnits(value, parseInt(form.state.values.tokenIn.split(":")[2])) < 0
                           ? "Amount must be greater than 0"
                           : undefined,
                     }}
@@ -211,7 +217,7 @@ export default function SwapComponent() {
                               onChange={(e) =>
                                 field.handleChange(e.target.value)
                               }
-                              className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                              className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none  [&::-webkit-inner-spin-button]:appearance-none"
                               type="number"
                               placeholder="0"
                               required
@@ -336,29 +342,39 @@ export default function SwapComponent() {
                           <p className="text-muted-foreground">You receive</p>
                         </div>
                         <div className="flex flex-row items-center justify-between my-4">
-                          {isDesktop ? (
-                            <input
-                              id="sellFormAmountOut"
-                              name="sellFormAmountOut"
-                              value=""
-                              className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                              type="number"
-                              placeholder="0"
-                              readOnly
-                            />
-                          ) : (
-                            <input
-                              id="sellFormAmountOut"
-                              name="sellFormAmountOut"
-                              value=""
-                              className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                              type="number"
-                              inputMode="decimal"
-                              pattern="[0-9]*"
-                              placeholder="0"
-                              readOnly
-                            />
-                          )}
+                          <form.Subscribe
+                            selector={(state) => [state.values.amountOut]}
+                          >
+                            {(
+                              amountOut // eslint-disable-line @typescript-eslint/no-unused-vars
+                            ) => (
+                              <>
+                              {isDesktop ? (
+                                <input
+                                  id="sellFormAmountOut"
+                                  name="sellFormAmountOut"
+                                  value={form.state.values.amountOut}
+                                  className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  type="number"
+                                  placeholder="0"
+                                  readOnly
+                                />
+                              ) : (
+                                <input
+                                  id="sellFormAmountOut"
+                                  name="sellFormAmountOut"
+                                  value={form.state.values.amountOut}
+                                  className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  type="number"
+                                  inputMode="decimal"
+                                  pattern="[0-9]*"
+                                  placeholder="0"
+                                  readOnly
+                                />
+                              )}
+                              </>
+                            )}
+                          </form.Subscribe>
                           <Dialog
                             open={tokenOutDialogOpen}
                             onOpenChange={setTokenOutDialogOpen}
@@ -620,6 +636,7 @@ export default function SwapComponent() {
               </form.Field>
             </div>
             <div className="flex flex-col gap-2">
+              <p className="text-muted-foreground">Approve</p>
               <div className="grid grid-cols-2 gap-2">
                 <form.Subscribe
                   selector={(state) => [state.canSubmit, state.isSubmitting]}
@@ -638,7 +655,7 @@ export default function SwapComponent() {
                           Please confirm in wallet
                         </>
                       ) : (
-                        <>Approve unlimited</>
+                        <>Unlimited</>
                       )}
                     </Button>
                   )}
@@ -659,7 +676,7 @@ export default function SwapComponent() {
                           Please confirm in wallet
                         </>
                       ) : (
-                        <>Approve exact</>
+                        <>Exact amount</>
                       )}
                     </Button>
                   )}
@@ -697,6 +714,8 @@ export default function SwapComponent() {
           tokenIn={form.state.values.tokenIn}
           tokenOut={form.state.values.tokenOut}
           amountIn={form.state.values.amountIn}
+          amountOut={form.state.values.amountOut}
+          setAmountOut={(value: string) => form.setFieldValue("amountOut", value)}
         />
         <TransactionStatusComponent />
       </div>
