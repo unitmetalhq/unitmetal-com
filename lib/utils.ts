@@ -45,3 +45,8 @@ export function chainIdToChainName(chainId: number) {
       return "Unknown"
   }
 }
+
+export function parseUsdAmount(amount: string) {
+  // use locale to format the amount
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(amount));
+}

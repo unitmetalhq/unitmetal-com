@@ -14,7 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useChainId, useSwitchChain } from "wagmi";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { parseEther } from "viem";
+import { parseEther, parseUnits } from "viem";
 import { Button } from "@/components/ui/button";
 import { Loader2, OctagonAlert } from "lucide-react";
 import {
@@ -46,7 +46,7 @@ export default function SwapComponent() {
       amountIn: "",
       amountOut: "",
       chain: "1:ethereum:Ethereum",
-      tokenIn: `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH`,
+      tokenIn: `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH:18`,
       tokenOut: "",
       slippage: "0.1",
     },
@@ -273,7 +273,7 @@ export default function SwapComponent() {
                                         className="flex flex-col gap-2 hover:cursor-pointer hover:bg-primary hover:text-secondary w-full text-left p-2"
                                         onClick={() => {
                                           field.handleChange(
-                                            `${token.address}:${token.symbol}`
+                                            `${token.address}:${token.symbol}:${token.decimals}`
                                           );
                                           // Clear tokenOut if it's the same as the selected tokenIn
                                           if (
@@ -389,7 +389,7 @@ export default function SwapComponent() {
                               <DialogHeader>
                                 <DialogTitle>Select a token</DialogTitle>
                                 <DialogDescription>
-                                  Search and select a token to sell
+                                  Search and select a token to receive
                                 </DialogDescription>
                               </DialogHeader>
                               {tokenOutList.map((token) => (
@@ -399,7 +399,7 @@ export default function SwapComponent() {
                                   onClick={() => {
                                     form.setFieldValue(
                                       "tokenOut",
-                                      `${token.address}:${token.symbol}`
+                                      `${token.address}:${token.symbol}:${token.decimals}`
                                     );
                                     // Clear tokenIn if it's the same as the selected tokenOut
                                     if (
@@ -410,7 +410,7 @@ export default function SwapComponent() {
                                     ) {
                                       form.setFieldValue(
                                         "tokenIn",
-                                        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH"
+                                        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH:18"
                                       );
                                     }
                                     setTokenOutDialogOpen(false);
@@ -693,10 +693,10 @@ export default function SwapComponent() {
       </div>
       <div className="grid grid-rows-2 gap-4 h-full">
         <SwapSourceComponent
-          chainName={form.state.values.chain.split(":")[1]}
-          tokenIn={form.state.values.tokenIn.split(":")[0]}
-          tokenOut={form.state.values.tokenOut.split(":")[0]}
-          amountIn={parseEther(form.state.values.amountIn).toString()}
+          chainName={form.state.values.chain}
+          tokenIn={form.state.values.tokenIn}
+          tokenOut={form.state.values.tokenOut}
+          amountIn={form.state.values.amountIn}
         />
         <TransactionStatusComponent />
       </div>

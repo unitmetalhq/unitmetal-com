@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { KyberSwap } from "@/lib/build-swap/kyberswap";
 import { Fuel } from "lucide-react";
 import { ChainIdentifier, GetSwapRouteResponse } from "@/lib/build-swap/types";
+import { parseUnits, formatUnits } from "viem";
+import { parseUsdAmount } from "@/lib/utils";
 
 const swapSources = [
   {
@@ -38,18 +40,9 @@ export default function SwapSourceComponent({
     refetch: refetchKyberswapQuote,
   } = useQuery({ 
     queryKey: ['kyberswap-quote', tokenIn, tokenOut, amountIn], 
-    queryFn: () => kyberswap.getSwapRoute({ chainName: chainName as ChainIdentifier, tokenIn, tokenOut, amountIn }),
+    queryFn: () => kyberswap.getSwapRoute({ chainName: chainName.split(":")[1] as ChainIdentifier, tokenIn: tokenIn.split(":")[0], tokenOut: tokenOut.split(":")[0], amountIn: parseUnits(amountIn, parseInt(tokenIn.split(":")[2])).toString() }),
     enabled: !!(tokenIn && tokenOut && amountIn && chainName)
   })
-  console.log("swap source component", { 
-    chainName, 
-    tokenIn, 
-    tokenOut, 
-    amountIn, 
-    enabled: !!(tokenIn && tokenOut && amountIn && chainName && 
-                tokenIn.trim() !== '' && tokenOut.trim() !== '' && 
-                amountIn.trim() !== '' && chainName.trim() !== '')
-  });
 
   return (
     <div className="flex flex-col border-2 border-primary pb-8 overflow-y-auto h-[400px]">
@@ -67,6 +60,7 @@ export default function SwapSourceComponent({
           key={source.name}
           name={source.name}
           rank={source.rank}
+          tokenOut={tokenOut}
           selectedSource={selectedSource}
           setSelectedSource={setSelectedSource}
           kyberswapQuote={kyberswapQuote}
@@ -91,6 +85,7 @@ export default function SwapSourceComponent({
 function SwapSource({
   name,
   rank,
+  tokenOut,
   selectedSource,
   setSelectedSource,
   kyberswapQuote,
@@ -103,6 +98,7 @@ function SwapSource({
 }: {
   name: string;
   rank: number;
+  tokenOut: string;
   selectedSource: string | null;
   setSelectedSource: (source: string | null) => void;
   kyberswapQuote: GetSwapRouteResponse | undefined;
@@ -128,13 +124,14 @@ function SwapSource({
       <div className="flex flex-row items-start justify-between w-full">
         <div className="flex flex-col gap-2">
           <div className="flex flex-row items-center gap-2">
-            <div>{kyberswapQuote?.data.routeSummary.amountOut}</div>
-            <div>≈{kyberswapQuote?.data.routeSummary.amountOutUsd}</div>
+            <div>{formatUnits(BigInt(kyberswapQuote?.data.routeSummary.amountOut ?? "0"), parseInt(tokenOut.split(":")[2])).toString()}</div>
+            <div>≈{parseUsdAmount(kyberswapQuote?.data.routeSummary.amountOutUsd ?? "0")}</div>
+            <div className="text-muted-foreground">{tokenOut.split(":")[1]}</div>
           </div>
           <div className="flex flex-row items-center gap-2">
             <Fuel className="w-4 h-4" />
             <div>&lt;{kyberswapQuote?.data.routeSummary.gas}</div>
-            <div>≈{kyberswapQuote?.data.routeSummary.gasUsd}</div>
+            <div>≈{parseUsdAmount(kyberswapQuote?.data.routeSummary.gasUsd ?? "0")}</div>
           </div>
         </div>
         <div

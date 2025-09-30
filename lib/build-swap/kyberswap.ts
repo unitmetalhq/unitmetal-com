@@ -38,6 +38,7 @@ export class KyberSwap {
     params: GetSwapRouteParams
   ): Promise<GetSwapRouteResponse> {
     const path = `${KYBERSWAP_BASE_URL}${params.chainName}${API_ROUTES.GET_SWAP_ROUTE}`;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { chainName, ...queryParams } = params;
     const queryString = this.objectToQueryString(queryParams);
     const url = `${path}?${queryString}`;
