@@ -16,7 +16,7 @@ import { useChainId, useSwitchChain } from "wagmi";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { parseEther } from "viem";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, OctagonAlert } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -33,11 +33,14 @@ import TransactionStatusComponent from "@/components/transaction-status-componen
 import { tokenList } from "@/lib/tokenList";
 import { chainList } from "@/lib/chainList";
 
-
 export default function SwapComponent() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
+  const {
+    switchChain,
+    isPending: isSwitchChainPending,
+    isError: isSwitchChainError,
+  } = useSwitchChain();
   const form = useForm({
     defaultValues: {
       amountIn: "",
@@ -65,7 +68,8 @@ export default function SwapComponent() {
   const tokenInList = useMemo(
     () =>
       chainAllTokens.filter((token) => {
-        const isNotETH = token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+        const isNotETH =
+          token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         const isNotSelectedTokenOut =
           !form.state.values.tokenOut ||
           token.address !== form.state.values.tokenOut.split(":")[0];
@@ -78,7 +82,8 @@ export default function SwapComponent() {
   const tokenOutList = useMemo(
     () =>
       chainAllTokens.filter((token) => {
-        const isNotETH = token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
+        const isNotETH =
+          token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         const isNotSelectedTokenIn =
           !form.state.values.tokenIn ||
           token.address !== form.state.values.tokenIn.split(":")[0];
@@ -102,16 +107,35 @@ export default function SwapComponent() {
         >
           <div className="flex flex-col gap-4 px-4 py-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="select-chain">Chain</Label>
+              <Label htmlFor="select-chain">Select chain</Label>
+              {isSwitchChainError && (
+                <div className="flex flex-row gap-2 items-center bg-red-500 p-2 text-secondary w-full">
+                  <OctagonAlert className="w-4 h-4" />
+                  <p className="text-sm font-bold">
+                    Failed to switch chain. Try again.
+                  </p>
+                </div>
+              )}
               <Select
                 onValueChange={(value) => {
-                  switchChain({ chainId: parseInt(value.split(":")[0]) });
-                  form.setFieldValue("chain", value);
+                  switchChain(
+                    { chainId: parseInt(value.split(":")[0]) },
+                    {
+                      onSuccess: () => {
+                        form.setFieldValue("chain", value);
+                      },
+                    }
+                  );
                 }}
                 defaultValue="1:ethereum:Ethereum"
               >
                 <SelectTrigger className="w-full border-primary border-1 rounded-none">
-                  <SelectValue placeholder="Select a chain" />
+                  <div className="flex flex-row gap-2">
+                    <SelectValue placeholder="Select a chain" />
+                    {isSwitchChainPending && (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    )}
+                  </div>
                 </SelectTrigger>
                 <SelectContent className="border-primary border-1 rounded-none">
                   {chainList.map((chain) => (
@@ -513,30 +537,28 @@ export default function SwapComponent() {
             <div>
               {/* A type-safe field component*/}
               <form.Field
-                  name="slippage"
-                  validators={{
-                    onChange: ({ value }) =>
-                      !value
-                        ? "Please enter an amount to swap"
-                        : parseEther(value) < 0
-                        ? "Amount must be greater than 0"
-                        : undefined,
-                  }}
-                >
-                  {(field) => (
-                    <div className="flex flex-col gap-2">
-                      <div className="flex flex-row gap-2 items-center justify-between">
-                        <p className="text-muted-foreground">Slippage %</p>
-                      </div>
-                      <div className="flex flex-row gap-4">
+                name="slippage"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value
+                      ? "Please enter an amount to swap"
+                      : parseEther(value) < 0
+                      ? "Amount must be greater than 0"
+                      : undefined,
+                }}
+              >
+                {(field) => (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-row gap-2 items-center justify-between">
+                      <p className="text-muted-foreground">Slippage %</p>
+                    </div>
+                    <div className="flex flex-row gap-4">
                       {isDesktop ? (
                         <input
                           id={field.name}
                           name={field.name}
                           value={field.state.value || ""}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value)
-                          }
+                          onChange={(e) => field.handleChange(e.target.value)}
                           className="bg-transparent text-sm outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           type="number"
                           placeholder="0"
@@ -546,9 +568,7 @@ export default function SwapComponent() {
                           id={field.name}
                           name={field.name}
                           value={field.state.value || ""}
-                          onChange={(e) =>
-                            field.handleChange(e.target.value)
-                          }
+                          onChange={(e) => field.handleChange(e.target.value)}
                           className="bg-transparent text-sm outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           type="number"
                           inputMode="decimal"
@@ -556,22 +576,34 @@ export default function SwapComponent() {
                           placeholder="0"
                         />
                       )}
-                        <button className="hover:cursor-pointer underline underline-offset-4" onClick={() => field.handleChange("0.02")}>
-                          0.02%
-                        </button>
-                        <button className="hover:cursor-pointer underline underline-offset-4" onClick={() => field.handleChange("0.1")}>
-                          0.1%
-                        </button>
-                        <button className="hover:cursor-pointer underline underline-offset-4" onClick={() => field.handleChange("0.5")}>
-                          0.5%
-                        </button>
-                        <button className="hover:cursor-pointer underline underline-offset-4" onClick={() => field.handleChange("1")}>
-                          1%
-                        </button>
-                      </div>
+                      <button
+                        className="hover:cursor-pointer underline underline-offset-4"
+                        onClick={() => field.handleChange("0.02")}
+                      >
+                        0.02%
+                      </button>
+                      <button
+                        className="hover:cursor-pointer underline underline-offset-4"
+                        onClick={() => field.handleChange("0.1")}
+                      >
+                        0.1%
+                      </button>
+                      <button
+                        className="hover:cursor-pointer underline underline-offset-4"
+                        onClick={() => field.handleChange("0.5")}
+                      >
+                        0.5%
+                      </button>
+                      <button
+                        className="hover:cursor-pointer underline underline-offset-4"
+                        onClick={() => field.handleChange("1")}
+                      >
+                        1%
+                      </button>
                     </div>
-                  )}
-                </form.Field>
+                  </div>
+                )}
+              </form.Field>
             </div>
             <div className="flex flex-col gap-2">
               <div className="grid grid-cols-2 gap-2">
