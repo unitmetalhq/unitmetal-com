@@ -9,7 +9,7 @@ import { API_ROUTES, KYBERSWAP_BASE_URL } from "@/lib/build-swap/constants";
 export class KyberSwap {
   private clientId: string;
 
-  constructor(clientId: string = "kyberswap") {
+  constructor(clientId: string = "pyhash") {
     this.clientId = clientId;
   }
 
@@ -37,8 +37,10 @@ export class KyberSwap {
   async getSwapRoute(
     params: GetSwapRouteParams
   ): Promise<GetSwapRouteResponse> {
-    const queryString = this.objectToQueryString(params);
-    const url = `${KYBERSWAP_BASE_URL}${params.chainName}${API_ROUTES.GET_SWAP_ROUTE}?${queryString}`;
+    const path = `${KYBERSWAP_BASE_URL}${params.chainName}${API_ROUTES.GET_SWAP_ROUTE}`;
+    const { chainName, ...queryParams } = params;
+    const queryString = this.objectToQueryString(queryParams);
+    const url = `${path}?${queryString}`;
 
     const response = await fetch(url, {
       method: "GET",

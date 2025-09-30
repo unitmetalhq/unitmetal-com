@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { KyberSwap } from "@/lib/build-swap/kyberswap";
 import { Fuel } from "lucide-react";
+import { ChainIdentifier, GetSwapRouteResponse } from "@/lib/build-swap/types";
 
 const swapSources = [
   {
@@ -10,8 +13,43 @@ const swapSources = [
   },
 ];
 
-export default function SwapSourceComponent() {
+export default function SwapSourceComponent({
+  chainName,
+  tokenIn,
+  tokenOut,
+  amountIn,
+}: {
+  chainName: string;
+  tokenIn: string;
+  tokenOut: string;
+  amountIn: string;
+}) {
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
+
+  const kyberswap = new KyberSwap();
+  // Kyberswap quote
+  const {
+    data: kyberswapQuote,
+    isLoading: isKyberswapQuoteLoading,
+    isError: isKyberswapQuoteError,
+    error: kyberswapQuoteError,
+    isRefetching: isKyberswapQuoteRefetching,
+    isRefetchError: isKyberswapQuoteRefetchError,
+    refetch: refetchKyberswapQuote,
+  } = useQuery({ 
+    queryKey: ['kyberswap-quote', tokenIn, tokenOut, amountIn], 
+    queryFn: () => kyberswap.getSwapRoute({ chainName: chainName as ChainIdentifier, tokenIn, tokenOut, amountIn }),
+    enabled: !!(tokenIn && tokenOut && amountIn && chainName)
+  })
+  console.log("swap source component", { 
+    chainName, 
+    tokenIn, 
+    tokenOut, 
+    amountIn, 
+    enabled: !!(tokenIn && tokenOut && amountIn && chainName && 
+                tokenIn.trim() !== '' && tokenOut.trim() !== '' && 
+                amountIn.trim() !== '' && chainName.trim() !== '')
+  });
 
   return (
     <div className="flex flex-col border-2 border-primary pb-8 overflow-y-auto h-[400px]">
@@ -31,9 +69,15 @@ export default function SwapSourceComponent() {
           rank={source.rank}
           selectedSource={selectedSource}
           setSelectedSource={setSelectedSource}
+          kyberswapQuote={kyberswapQuote}
+          isKyberswapQuoteLoading={isKyberswapQuoteLoading}
+          isKyberswapQuoteError={isKyberswapQuoteError}
+          kyberswapQuoteError={kyberswapQuoteError}
+          isKyberswapQuoteRefetching={isKyberswapQuoteRefetching}
+          isKyberswapQuoteRefetchError={isKyberswapQuoteRefetchError}
+          refetchKyberswapQuote={refetchKyberswapQuote}
         />
       ))}
-
       <div className="flex flex-col gap-2 px-4 py-2">
         <p className="text-sm text-muted-foreground">
           We are working on adding more aggregators to our platform. Please stay
@@ -49,13 +93,27 @@ function SwapSource({
   rank,
   selectedSource,
   setSelectedSource,
+  kyberswapQuote,
+  isKyberswapQuoteLoading,
+  isKyberswapQuoteError,
+  kyberswapQuoteError,
+  isKyberswapQuoteRefetching,
+  isKyberswapQuoteRefetchError,
+  refetchKyberswapQuote,
 }: {
   name: string;
   rank: number;
   selectedSource: string | null;
   setSelectedSource: (source: string | null) => void;
+  kyberswapQuote: GetSwapRouteResponse | undefined;
+  isKyberswapQuoteLoading: boolean;
+  isKyberswapQuoteError: boolean;
+  kyberswapQuoteError: Error | null;
+  isKyberswapQuoteRefetching: boolean;
+  isKyberswapQuoteRefetchError: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  refetchKyberswapQuote: () => Promise<any>;
 }) {
-
   function handleSelectedSource(name: string) {
     setSelectedSource(selectedSource === name ? null : name);
   }
@@ -70,13 +128,13 @@ function SwapSource({
       <div className="flex flex-row items-start justify-between w-full">
         <div className="flex flex-col gap-2">
           <div className="flex flex-row items-center gap-2">
-            <div>1000.020203</div>
-            <div className="text-muted-foreground">USDC</div>
+            <div>{kyberswapQuote?.data.routeSummary.amountOut}</div>
+            <div>≈{kyberswapQuote?.data.routeSummary.amountOutUsd}</div>
           </div>
           <div className="flex flex-row items-center gap-2">
             <Fuel className="w-4 h-4" />
-            <div>&lt;$0.01</div>
-            <div>≈</div>
+            <div>&lt;{kyberswapQuote?.data.routeSummary.gas}</div>
+            <div>≈{kyberswapQuote?.data.routeSummary.gasUsd}</div>
           </div>
         </div>
         <div

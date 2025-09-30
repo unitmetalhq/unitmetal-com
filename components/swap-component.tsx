@@ -50,6 +50,20 @@ export default function SwapComponent() {
       tokenOut: "",
       slippage: "0.1",
     },
+    listeners: {
+      onChange: ({ formApi }) => {
+        // check if amountIn, tokenIn and tokenOut are valid
+        if (
+          formApi.state.values.amountIn &&
+          formApi.state.values.tokenIn &&
+          formApi.state.values.tokenOut &&
+          formApi.state.values.slippage
+        ) {
+          console.log("swap component", formApi.state.values);
+        }
+      },
+      onChangeDebounceMs: 500,
+    },
     onSubmit: async ({ value }) => {
       console.log(value);
     },
@@ -678,7 +692,12 @@ export default function SwapComponent() {
         </form>
       </div>
       <div className="grid grid-rows-2 gap-4 h-full">
-        <SwapSourceComponent />
+        <SwapSourceComponent
+          chainName={form.state.values.chain.split(":")[1]}
+          tokenIn={form.state.values.tokenIn.split(":")[0]}
+          tokenOut={form.state.values.tokenOut.split(":")[0]}
+          amountIn={parseEther(form.state.values.amountIn).toString()}
+        />
         <TransactionStatusComponent />
       </div>
     </>
