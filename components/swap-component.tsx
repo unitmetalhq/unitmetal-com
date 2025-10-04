@@ -5,13 +5,6 @@ import { useState, useMemo } from "react";
 import { useForm } from "@tanstack/react-form";
 import type { AnyFieldApi } from "@tanstack/react-form";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   useChainId,
   useSwitchChain,
   useReadContract,
@@ -40,10 +33,12 @@ import { tokenList } from "@/lib/tokenList";
 import { chainList, type ChainIdentifier } from "@/lib/chainList";
 
 export default function SwapComponent() {
-  // detect desktop device
+  // hook to detect desktop device
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  // check for chainId
+
+  // hook to get current chainId
   const chainId = useChainId();
+
   // hook to switch chain
   const {
     switchChain,
@@ -65,6 +60,7 @@ export default function SwapComponent() {
       },
     }
   );
+
   // form to handle the swap
   const form = useForm({
     // default values for the form
@@ -108,11 +104,12 @@ export default function SwapComponent() {
   // hook to get tokenIn balance
   const { data: tokenInBalance, isLoading: isLoadingTokenInBalance } =
     useReadContract({
-      address: form.state.values.tokenIn.split(":")[0] as Address,
-      abi: erc20Abi,
-      functionName: "balanceOf",
-      args: [address as Address],
+      address: form.state.values.tokenIn.split(":")[0] as Address, // tokenIn address
+      abi: erc20Abi, // erc20 abi
+      functionName: "balanceOf", // balanceOf function
+      args: [address as Address], // address of the connected wallet
       query: {
+        // only fetch tokenIn balance if tokenIn is selected and not the native token
         enabled:
           !!form.state.values.tokenIn &&
           form.state.values.tokenIn.split(":")[0] !==
@@ -123,11 +120,12 @@ export default function SwapComponent() {
   // hook to get tokenOut balance
   const { data: tokenOutBalance, isLoading: isLoadingTokenOutBalance } =
     useReadContract({
-      address: form.state.values.tokenOut.split(":")[0] as Address,
+      address: form.state.values.tokenOut.split(":")[0] as Address, // tokenOut address
       abi: erc20Abi,
-      functionName: "balanceOf",
-      args: [address as Address],
+      functionName: "balanceOf", // balanceOf function
+      args: [address as Address], // address of the connected wallet
       query: {
+        // only fetch tokenOut balance if tokenOut is selected and not the native token
         enabled:
           !!form.state.values.tokenOut &&
           form.state.values.tokenOut.split(":")[0] !==
@@ -137,7 +135,7 @@ export default function SwapComponent() {
 
   // Get all tokens for the current chain and memoize them
   const chainAllTokens = useMemo(
-    () => tokenList.filter((token) => token.chainId === chainId),
+    () => tokenList.filter((token) => token.chainId === chainId), // filter tokens by chainId
     [chainId]
   );
 
@@ -147,10 +145,10 @@ export default function SwapComponent() {
       chainAllTokens.filter((token) => {
         const isNotSelectedTokenOut =
           !form.state.values.tokenOut ||
-          token.address !== form.state.values.tokenOut.split(":")[0];
+          token.address !== form.state.values.tokenOut.split(":")[0]; // check if tokenOut is not the selected tokenOut
         return isNotSelectedTokenOut;
       }),
-    [chainAllTokens, form.state.values.tokenOut]
+    [chainAllTokens, form.state.values.tokenOut] // only re-run if tokenOut is changed
   );
 
   // tokenOutList excludes only the selected tokenIn
@@ -159,13 +157,13 @@ export default function SwapComponent() {
       chainAllTokens.filter((token) => {
         const isNotSelectedTokenIn =
           !form.state.values.tokenIn ||
-          token.address !== form.state.values.tokenIn.split(":")[0];
+          token.address !== form.state.values.tokenIn.split(":")[0]; // check if tokenIn is not the selected tokenIn
         return isNotSelectedTokenIn;
       }),
-    [chainAllTokens, form.state.values.tokenIn]
+    [chainAllTokens, form.state.values.tokenIn] // only re-run if tokenIn is changed
   );
 
-  // render
+  // render the swap component
   return (
     <>
       <div className="flex flex-col border-2 border-primary gap-2 pb-8">
@@ -801,60 +799,64 @@ export default function SwapComponent() {
               </form.Field>
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-muted-foreground">Approve</p>
-              <div className="grid grid-cols-2 gap-2">
-                <form.Subscribe
-                  selector={(state) => [state.canSubmit, state.isSubmitting]}
-                >
-                  {([canSubmit, isSubmitting]) => (
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="hover:cursor-pointer font-bold rounded-none text-sm"
-                      type="submit"
-                      disabled={!canSubmit || isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Please confirm in wallet
-                        </>
-                      ) : (
-                        <>Unlimited</>
-                      )}
-                    </Button>
-                  )}
-                </form.Subscribe>
-                <form.Subscribe
-                  selector={(state) => [state.canSubmit, state.isSubmitting]}
-                >
-                  {([canSubmit, isSubmitting]) => (
-                    <Button
-                      size="lg"
-                      className="hover:cursor-pointer font-bold rounded-none text-sm"
-                      type="submit"
-                      disabled={!canSubmit || isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Please confirm in wallet
-                        </>
-                      ) : (
-                        <>Exact amount</>
-                      )}
-                    </Button>
-                  )}
-                </form.Subscribe>
+              <div className="flex flex-row justify-between items-center">
+                <p className="text-muted-foreground">Approve</p>
+                <p className="text-muted-foreground">Form</p>
               </div>
-
+              <form.Subscribe
+                selector={(state) => [state.canSubmit, state.isSubmitting]}
+              >
+                {([canSubmit, isSubmitting]) => (
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="flex flex-row gap-2">
+                      <Button
+                        variant="secondary"
+                        className="hover:cursor-pointer font-bold rounded-none text-sm col-span-2"
+                        type="submit"
+                        disabled={!canSubmit || isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Signing...
+                          </>
+                        ) : (
+                          <>Unlimited</>
+                        )}
+                      </Button>
+                      <Button
+                        className="hover:cursor-pointer font-bold rounded-none text-sm col-span-2"
+                        type="submit"
+                        disabled={!canSubmit || isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Signing...
+                          </>
+                        ) : (
+                          <>Exact</>
+                        )}
+                      </Button>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="hover:cursor-pointer font-bold rounded-none text-sm col-span-1"
+                      type="reset"
+                      onClick={() => form.reset()}
+                    >
+                      Reset
+                    </Button>
+                  </div>
+                )}
+              </form.Subscribe>
               <form.Subscribe
                 selector={(state) => [state.canSubmit, state.isSubmitting]}
               >
                 {([canSubmit, isSubmitting]) => (
                   <Button
                     size="lg"
-                    className="hover:cursor-pointer text-lg font-bold rounded-none"
+                    className="hover:cursor-pointer text-lg font-bold rounded-none col-span-4"
                     type="submit"
                     disabled={!canSubmit || isSubmitting}
                   >
