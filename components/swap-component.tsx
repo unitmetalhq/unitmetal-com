@@ -206,51 +206,6 @@ export default function SwapComponent() {
                   </Button>
                 </div>
               )}
-              {/* <form.Field
-                name="chain"
-                validators={{
-                  onChange: ({ value }) =>
-                    !value
-                      ? "Please select a chain"
-                      : !chainList.includes(value)
-                      ? "Invalid chain"
-                      : undefined,
-                }}
-              >
-                {(field) => (
-                  <div className="flex flex-col gap-2">
-                    <Select
-                      onValueChange={(value) => {
-                        switchChain(
-                          { chainId: parseInt(value.split(":")[0]) },
-                          {
-                            onSuccess: () => {
-                              field.handleChange(value);
-                            },
-                          }
-                        );
-                      }}
-                    >
-                      <SelectTrigger className="w-full border-primary border-1 rounded-none">
-                        <div className="flex flex-row gap-2">
-                          <SelectValue placeholder="Select a chain" />
-                          {isSwitchChainPending && (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          )}
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent className="border-primary border-1 rounded-none">
-                        {chainList.map((chain) => (
-                          <SelectItem key={chain} value={chain}>
-                            {chain.split(":")[2]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <SelectFieldInfo field={field} />
-                  </div>
-                )}
-              </form.Field> */}
               <form.Field
                 name="chain"
                 validators={{
@@ -442,13 +397,10 @@ export default function SwapComponent() {
                                   Search and select a token to sell
                                 </DialogDescription>
                               </DialogHeader>
-                              {tokenInList.map((token) => (
-                                <form.Field
-                                  key={`${token.chain}:${token.address}`}
-                                  name="tokenIn"
-                                >
-                                  {(field) => (
-                                    <>
+                              <form.Field name="tokenIn">
+                                {(field) => (
+                                  <>
+                                    {tokenInList.map((token) => (
                                       <button
                                         key={`${token.chain}:${token.address}`}
                                         className="flex flex-col gap-2 hover:cursor-pointer hover:bg-primary hover:text-secondary w-full text-left p-2"
@@ -468,10 +420,10 @@ export default function SwapComponent() {
                                           </p>
                                         </div>
                                       </button>
-                                    </>
-                                  )}
-                                </form.Field>
-                              ))}
+                                    ))}
+                                  </>
+                                )}
+                              </form.Field>
                               <DialogFooter>
                                 <DialogClose asChild>
                                   <Button
