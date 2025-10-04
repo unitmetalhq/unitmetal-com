@@ -84,8 +84,8 @@ export const tokenList = [
     chain: "base",
     chainId: 8453,
     address: "0x820C137fa70C8691f0e44Dc420a5e53c168921Dc",
-    symbol: "USD₮0",
-    decimals: 6
+    symbol: "USDS",
+    decimals: 18
   },
   {
     name: "Wrapped Ether",

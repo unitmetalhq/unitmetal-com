@@ -14,7 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useChainId, useSwitchChain } from "wagmi";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { parseEther, parseUnits, formatUnits } from "viem";
+import { parseEther, parseUnits } from "viem";
 import { Button } from "@/components/ui/button";
 import { Loader2, OctagonAlert } from "lucide-react";
 import {

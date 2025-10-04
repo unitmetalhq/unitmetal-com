@@ -167,15 +167,17 @@ function SwapSource({
     >
       <div className="flex flex-row items-start justify-between w-full">
         <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-center gap-2">
-            <div>{formatUnits(BigInt(kyberswapQuote?.data.routeSummary.amountOut ?? "0"), parseInt(tokenOut.split(":")[2])).toString()}</div>
-            <div>(~{parseUsdAmount(kyberswapQuote?.data.routeSummary.amountOutUsd ?? "0")})</div>
-            <div className="text-muted-foreground">{tokenOut.split(":")[1]}</div>
+          <div className="flex flex-col items-start gap-2">
+            <div className="text-sm">{formatUnits(BigInt(kyberswapQuote?.data.routeSummary.amountOut ?? "0"), parseInt(tokenOut.split(":")[2])).toString()}</div>
+            <div className="flex flex-row gap-2">
+              <div className="text-sm">(~{parseUsdAmount(kyberswapQuote?.data.routeSummary.amountOutUsd ?? "0")})</div>
+              <div className="text-sm text-muted-foreground">{tokenOut.split(":")[1]}</div>
+            </div>
           </div>
           <div className="flex flex-row items-center gap-2">
             <Fuel className="w-4 h-4" />
-            <div>&lt;{kyberswapQuote?.data.routeSummary.gas}</div>
-            <div>(~{parseUsdAmount(kyberswapQuote?.data.routeSummary.gasUsd ?? "0")})</div>
+            <div className="text-sm">&lt;{kyberswapQuote?.data.routeSummary.gas}</div>
+            <div className="text-sm">(~{parseUsdAmount(kyberswapQuote?.data.routeSummary.gasUsd ?? "0")})</div>
           </div>
         </div>
         <div
@@ -190,8 +192,8 @@ function SwapSource({
       </div>
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-row items-center place-items-end gap-2">
-          <p className="text-muted-foreground">via</p>
-          <p>{name}</p>
+          <p className="text-sm text-muted-foreground">via</p>
+          <p className="text-sm">{name}</p>
         </div>
       </div>
     </div>
