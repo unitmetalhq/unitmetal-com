@@ -11,12 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { useChainId, useSwitchChain } from "wagmi";
+import {
+  useChainId,
+  useSwitchChain,
+  useReadContract,
+  useAccount,
+  useBalance,
+} from "wagmi";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { parseEther, parseUnits } from "viem";
+import { BuildSkeleton } from "@/components/build-ui/build-skeleton";
+import { parseEther, parseUnits, erc20Abi, formatUnits, Address } from "viem";
 import { Button } from "@/components/ui/button";
-import { Loader2, OctagonAlert } from "lucide-react";
+import { Loader2, OctagonAlert, X } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -43,17 +49,32 @@ export default function SwapComponent() {
     switchChain,
     isPending: isSwitchChainPending,
     isError: isSwitchChainError,
+    reset: resetSwitchChain,
   } = useSwitchChain();
+
+  // hook to get account
+  const { address, isConnected } = useAccount();
+
+  // get native balance if tokenIn of tokenOut is selected
+  const { data: nativeBalance, isLoading: isLoadingNativeBalance } = useBalance(
+    {
+      address: address,
+      chainId: chainId,
+      query: {
+        enabled: !!address,
+      },
+    }
+  );
   // form to handle the swap
   const form = useForm({
     // default values for the form
     defaultValues: {
       amountIn: "",
       amountOut: "",
-      chain: "1:ethereum:Ethereum",
+      chain: "",
       tokenIn: "",
       tokenOut: "",
-      slippage: "0.1",
+      slippage: "0",
     },
     // listeners for the form
     listeners: {
@@ -75,8 +96,35 @@ export default function SwapComponent() {
     },
   });
 
+  // open and close state for tokenInDialog
   const [tokenInDialogOpen, setTokenInDialogOpen] = useState(false);
+
+  // open and close state for tokenOutDialog
   const [tokenOutDialogOpen, setTokenOutDialogOpen] = useState(false);
+
+  // hook to get tokenIn balance
+  const { data: tokenInBalance, isLoading: isLoadingTokenInBalance } =
+    useReadContract({
+      address: form.state.values.tokenIn.split(":")[0] as Address,
+      abi: erc20Abi,
+      functionName: "balanceOf",
+      args: [address as Address],
+      query: {
+        enabled: !!form.state.values.tokenIn && form.state.values.tokenIn.split(":")[0] !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      },
+    });
+
+  // hook to get tokenOut balance
+  const { data: tokenOutBalance, isLoading: isLoadingTokenOutBalance } =
+    useReadContract({
+      address: form.state.values.tokenOut.split(":")[0] as Address,
+      abi: erc20Abi,
+      functionName: "balanceOf",
+      args: [address as Address],
+      query: {
+        enabled: !!form.state.values.tokenOut && form.state.values.tokenOut.split(":")[0] !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      },
+    });
 
   // Get all tokens for the current chain and memoize them
   const chainAllTokens = useMemo(
@@ -108,6 +156,7 @@ export default function SwapComponent() {
     [chainAllTokens, form.state.values.tokenIn]
   );
 
+  // render
   return (
     <>
       <div className="flex flex-col border-2 border-primary gap-2 pb-8">
@@ -123,44 +172,76 @@ export default function SwapComponent() {
         >
           <div className="flex flex-col gap-4 px-4 py-2">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="select-chain">Select chain</Label>
-              {isSwitchChainError && (
-                <div className="flex flex-row gap-2 items-center bg-red-500 p-2 text-secondary w-full">
+              {!isConnected && (
+                <div className="flex flex-row gap-2 items-center bg-blue-500 p-2 text-white w-full">
                   <OctagonAlert className="w-4 h-4" />
                   <p className="text-sm font-bold">
-                    Failed to switch chain. Try again.
+                    Please connect your wallet to continue.
                   </p>
                 </div>
               )}
-              <Select
-                onValueChange={(value) => {
-                  switchChain(
-                    { chainId: parseInt(value.split(":")[0]) },
-                    {
-                      onSuccess: () => {
-                        form.setFieldValue("chain", value);
-                      },
-                    }
-                  );
-                }}
-                defaultValue="1:ethereum:Ethereum"
-              >
-                <SelectTrigger className="w-full border-primary border-1 rounded-none">
-                  <div className="flex flex-row gap-2">
-                    <SelectValue placeholder="Select a chain" />
-                    {isSwitchChainPending && (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    )}
+              {isSwitchChainError && (
+                <div className="flex flex-row justify-between items-center bg-red-500 p-2 text-white w-full">
+                  <div className="flex flex-row gap-2 items-center">
+                    <OctagonAlert className="w-4 h-4" />
+                    <p className="text-sm font-bold">
+                      Failed to switch chain. Try again.
+                    </p>
                   </div>
-                </SelectTrigger>
-                <SelectContent className="border-primary border-1 rounded-none">
-                  {chainList.map((chain) => (
-                    <SelectItem key={chain} value={chain}>
-                      {chain.split(":")[2]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <Button
+                    variant="ghost"
+                    className="rounded-none hover:cursor-pointer"
+                    onClick={() => resetSwitchChain()}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              <form.Field
+                name="chain"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value
+                      ? "Please select a chain"
+                      : !chainList.includes(value)
+                      ? "Invalid chain"
+                      : undefined,
+                }}
+              >
+                {(field) => (
+                  <div className="flex flex-col gap-2">
+                    <Select
+                      onValueChange={(value) => {
+                        switchChain(
+                          { chainId: parseInt(value.split(":")[0]) },
+                          {
+                            onSuccess: () => {
+                              field.handleChange(value);
+                            },
+                          }
+                        );
+                      }}
+                    >
+                      <SelectTrigger className="w-full border-primary border-1 rounded-none">
+                        <div className="flex flex-row gap-2">
+                          <SelectValue placeholder="Select a chain" />
+                          {isSwitchChainPending && (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          )}
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="border-primary border-1 rounded-none">
+                        {chainList.map((chain) => (
+                          <SelectItem key={chain} value={chain}>
+                            {chain.split(":")[2]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <SelectFieldInfo field={field} />
+                  </div>
+                )}
+              </form.Field>
             </div>
             <Tabs defaultValue="sell" className="w-full">
               <TabsList className="border-primary border-1 rounded-none">
@@ -180,7 +261,10 @@ export default function SwapComponent() {
                       onChange: ({ value }) =>
                         !value
                           ? "Please enter an amount to swap"
-                          : parseUnits(value, parseInt(form.state.values.tokenIn.split(":")[2])) < 0
+                          : parseUnits(
+                              value,
+                              parseInt(form.state.values.tokenIn.split(":")[2])
+                            ) < 0
                           ? "Amount must be greater than 0"
                           : undefined,
                     }}
@@ -204,7 +288,7 @@ export default function SwapComponent() {
                             </button>
                           </div>
                         </div>
-                        <div className="flex flex-row items-center justify-between my-4">
+                        <div className="flex flex-row items-center justify-between">
                           {isDesktop ? (
                             <input
                               id={field.name}
@@ -310,6 +394,31 @@ export default function SwapComponent() {
                             </DialogContent>
                           </Dialog>
                         </div>
+                        <div className="flex flex-row gap-2 items-center">
+                          {isLoadingTokenInBalance || isLoadingNativeBalance ? (
+                            <BuildSkeleton className="w-8 h-3" />
+                          ) : form.state.values.tokenIn.split(":")[0] ===
+                              "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" &&
+                            nativeBalance ? (
+                            <div className="text-sm text-muted-foreground">
+                              {formatUnits(nativeBalance.value, 18)}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-muted-foreground">
+                              {formatUnits(
+                                tokenInBalance ?? BigInt(0),
+                                parseInt(
+                                  form.state.values.tokenIn.split(":")[2]
+                                )
+                              )}
+                            </div>
+                          )}
+                          <div className="text-sm text-muted-foreground">
+                            {form.state.values.tokenIn.split(":")[1]
+                              ? form.state.values.tokenIn.split(":")[1]
+                              : "--"}
+                          </div>
+                        </div>
                         <FieldInfo field={field} />
                       </div>
                     )}
@@ -332,7 +441,7 @@ export default function SwapComponent() {
                         <div className="flex flex-row gap-2 items-center justify-between">
                           <p className="text-muted-foreground">You receive</p>
                         </div>
-                        <div className="flex flex-row items-center justify-between my-4">
+                        <div className="flex flex-row items-center justify-between">
                           <form.Subscribe
                             selector={(state) => [state.values.amountOut]}
                           >
@@ -340,29 +449,29 @@ export default function SwapComponent() {
                               amountOut // eslint-disable-line @typescript-eslint/no-unused-vars
                             ) => (
                               <>
-                              {isDesktop ? (
-                                <input
-                                  id="sellFormAmountOut"
-                                  name="sellFormAmountOut"
-                                  value={form.state.values.amountOut}
-                                  className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  type="number"
-                                  placeholder="0"
-                                  readOnly
-                                />
-                              ) : (
-                                <input
-                                  id="sellFormAmountOut"
-                                  name="sellFormAmountOut"
-                                  value={form.state.values.amountOut}
-                                  className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                  type="number"
-                                  inputMode="decimal"
-                                  pattern="[0-9]*"
-                                  placeholder="0"
-                                  readOnly
-                                />
-                              )}
+                                {isDesktop ? (
+                                  <input
+                                    id="sellFormAmountOut"
+                                    name="sellFormAmountOut"
+                                    value={form.state.values.amountOut}
+                                    className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    type="number"
+                                    placeholder="0"
+                                    readOnly
+                                  />
+                                ) : (
+                                  <input
+                                    id="sellFormAmountOut"
+                                    name="sellFormAmountOut"
+                                    value={form.state.values.amountOut}
+                                    className="bg-transparent text-4xl outline-none w-full [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                    type="number"
+                                    inputMode="decimal"
+                                    pattern="[0-9]*"
+                                    placeholder="0"
+                                    readOnly
+                                  />
+                                )}
                               </>
                             )}
                           </form.Subscribe>
@@ -434,6 +543,31 @@ export default function SwapComponent() {
                             </DialogContent>
                           </Dialog>
                         </div>
+                        <div className="flex flex-row gap-2 items-center">
+                          {isLoadingTokenOutBalance ? (
+                            <BuildSkeleton className="w-8 h-3" />
+                          ) : form.state.values.tokenOut.split(":")[0] ===
+                              "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" &&
+                            nativeBalance ? (
+                            <div className="text-sm text-muted-foreground">
+                              {formatUnits(nativeBalance.value, 18)}
+                            </div>
+                          ) : (
+                            <div className="text-sm text-muted-foreground">
+                              {formatUnits(
+                                tokenOutBalance ?? BigInt(0),
+                                parseInt(
+                                  form.state.values.tokenOut.split(":")[2]
+                                )
+                              )}
+                            </div>
+                          )}
+                          <div className="text-sm text-muted-foreground">
+                            {form.state.values.tokenOut.split(":")[1]
+                              ? form.state.values.tokenOut.split(":")[1]
+                              : "--"}
+                          </div>
+                        </div>
                         <FieldInfo field={field} />
                       </div>
                     )}
@@ -473,7 +607,7 @@ export default function SwapComponent() {
                             </button>
                           </div>
                         </div>
-                        <div className="flex flex-row gap-2 my-4">
+                        <div className="flex flex-row gap-2">
                           {isDesktop ? (
                             <input
                               id={field.name}
@@ -514,7 +648,7 @@ export default function SwapComponent() {
                     <div className="flex flex-row gap-2 items-center justify-between">
                       <p className="text-muted-foreground">You need</p>
                     </div>
-                    <div className="flex flex-row gap-2 my-4">
+                    <div className="flex flex-row gap-2">
                       {isDesktop ? (
                         <input
                           id="buyFormAmountIn"
@@ -551,7 +685,7 @@ export default function SwapComponent() {
                   onChange: ({ value }) =>
                     !value
                       ? "Please enter an amount to swap"
-                      : parseEther(value) < 0
+                      : value !== "999" && parseFloat(value) < 0
                       ? "Amount must be greater than 0"
                       : undefined,
                 }}
@@ -559,9 +693,35 @@ export default function SwapComponent() {
                 {(field) => (
                   <div className="flex flex-col gap-2">
                     <div className="flex flex-row gap-2 items-center justify-between">
-                      <p className="text-muted-foreground">Slippage %</p>
+                      <p className="text-muted-foreground">Slippage</p>
+                      <div className="flex flex-row gap-2">
+                        <button
+                          className="hover:cursor-pointer underline underline-offset-4"
+                          onClick={() => field.handleChange("0.1")}
+                        >
+                          0.1%
+                        </button>
+                        <button
+                          className="hover:cursor-pointer underline underline-offset-4"
+                          onClick={() => field.handleChange("0.5")}
+                        >
+                          0.5%
+                        </button>
+                        <button
+                          className="hover:cursor-pointer underline underline-offset-4"
+                          onClick={() => field.handleChange("1")}
+                        >
+                          1%
+                        </button>
+                        <button
+                          className="hover:cursor-pointer underline underline-offset-4"
+                          onClick={() => field.handleChange("0")}
+                        >
+                          Auto
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex flex-row gap-4">
+                    <div className="flex flex-row items-center justify-between">
                       {isDesktop ? (
                         <input
                           id={field.name}
@@ -585,30 +745,13 @@ export default function SwapComponent() {
                           placeholder="0"
                         />
                       )}
-                      <button
-                        className="hover:cursor-pointer underline underline-offset-4"
-                        onClick={() => field.handleChange("0.02")}
-                      >
-                        0.02%
-                      </button>
-                      <button
-                        className="hover:cursor-pointer underline underline-offset-4"
-                        onClick={() => field.handleChange("0.1")}
-                      >
-                        0.1%
-                      </button>
-                      <button
-                        className="hover:cursor-pointer underline underline-offset-4"
-                        onClick={() => field.handleChange("0.5")}
-                      >
-                        0.5%
-                      </button>
-                      <button
-                        className="hover:cursor-pointer underline underline-offset-4"
-                        onClick={() => field.handleChange("1")}
-                      >
-                        1%
-                      </button>
+                      <div>
+                        {field.state.value === "0" ? (
+                          <p className="text-muted-foreground">Auto</p>
+                        ) : (
+                          <p className="text-muted-foreground">%</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -694,7 +837,9 @@ export default function SwapComponent() {
           tokenOut={form.state.values.tokenOut}
           amountIn={form.state.values.amountIn}
           amountOut={form.state.values.amountOut}
-          setAmountOut={(value: string) => form.setFieldValue("amountOut", value)}
+          setAmountOut={(value: string) =>
+            form.setFieldValue("amountOut", value)
+          }
         />
         <TransactionStatusComponent />
       </div>
@@ -702,6 +847,7 @@ export default function SwapComponent() {
   );
 }
 
+// field info for input field
 function FieldInfo({ field }: { field: AnyFieldApi }) {
   return (
     <>
@@ -722,6 +868,21 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
         <em className="text-green-500">ok!</em>
       )}
       {field.state.meta.isValidating ? "Validating..." : null}
+    </>
+  );
+}
+
+// field info for select field
+function SelectFieldInfo({ field }: { field: AnyFieldApi }) {
+  return (
+    <>
+      {!field.state.meta.isTouched ? (
+        <em>Please select a chain</em>
+      ) : field.state.meta.isTouched && !field.state.meta.isValid ? (
+        <em className="text-red-400">{field.state.meta.errors.join(",")}</em>
+      ) : (
+        <em className="text-green-500">ok!</em>
+      )}
     </>
   );
 }
