@@ -51,7 +51,7 @@ export default function SwapComponent() {
       amountIn: "",
       amountOut: "",
       chain: "1:ethereum:Ethereum",
-      tokenIn: `0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH:18`,
+      tokenIn: "",
       tokenOut: "",
       slippage: "0.1",
     },
@@ -78,36 +78,32 @@ export default function SwapComponent() {
   const [tokenInDialogOpen, setTokenInDialogOpen] = useState(false);
   const [tokenOutDialogOpen, setTokenOutDialogOpen] = useState(false);
 
-  // Get all tokens for the current chain
+  // Get all tokens for the current chain and memoize them
   const chainAllTokens = useMemo(
     () => tokenList.filter((token) => token.chainId === chainId),
     [chainId]
   );
 
-  // tokenInList excludes ETH by default and the selected tokenOut
+  // tokenInList excludes only the selected tokenOut
   const tokenInList = useMemo(
     () =>
       chainAllTokens.filter((token) => {
-        const isNotETH =
-          token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         const isNotSelectedTokenOut =
           !form.state.values.tokenOut ||
           token.address !== form.state.values.tokenOut.split(":")[0];
-        return isNotETH && isNotSelectedTokenOut;
+        return isNotSelectedTokenOut;
       }),
     [chainAllTokens, form.state.values.tokenOut]
   );
 
-  // tokenOutList excludes ETH by default and the selected tokenIn
+  // tokenOutList excludes only the selected tokenIn
   const tokenOutList = useMemo(
     () =>
       chainAllTokens.filter((token) => {
-        const isNotETH =
-          token.address !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
         const isNotSelectedTokenIn =
           !form.state.values.tokenIn ||
           token.address !== form.state.values.tokenIn.split(":")[0];
-        return isNotETH && isNotSelectedTokenIn;
+        return isNotSelectedTokenIn;
       }),
     [chainAllTokens, form.state.values.tokenIn]
   );
@@ -254,7 +250,11 @@ export default function SwapComponent() {
                                     tokenIn // eslint-disable-line @typescript-eslint/no-unused-vars
                                   ) => (
                                     <span>
-                                      {form.state.values.tokenIn.split(":")[1]}
+                                      {form.state.values.tokenIn.split(":")[1]
+                                        ? form.state.values.tokenIn.split(
+                                            ":"
+                                          )[1]
+                                        : "Select token"}
                                     </span>
                                   )}
                                 </form.Subscribe>
@@ -281,15 +281,6 @@ export default function SwapComponent() {
                                           field.handleChange(
                                             `${token.address}:${token.symbol}:${token.decimals}`
                                           );
-                                          // Clear tokenOut if it's the same as the selected tokenIn
-                                          if (
-                                            form.state.values.tokenOut &&
-                                            form.state.values.tokenOut.split(
-                                              ":"
-                                            )[0] === token.address
-                                          ) {
-                                            form.setFieldValue("tokenOut", "");
-                                          }
                                           setTokenInDialogOpen(false);
                                         }}
                                       >
@@ -417,18 +408,6 @@ export default function SwapComponent() {
                                       "tokenOut",
                                       `${token.address}:${token.symbol}:${token.decimals}`
                                     );
-                                    // Clear tokenIn if it's the same as the selected tokenOut
-                                    if (
-                                      form.state.values.tokenIn &&
-                                      form.state.values.tokenIn.split(
-                                        ":"
-                                      )[0] === token.address
-                                    ) {
-                                      form.setFieldValue(
-                                        "tokenIn",
-                                        "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE:ETH:18"
-                                      );
-                                    }
                                     setTokenOutDialogOpen(false);
                                   }}
                                 >
