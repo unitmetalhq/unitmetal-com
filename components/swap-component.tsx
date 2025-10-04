@@ -37,7 +37,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import SwapSourceComponent from "@/components/swap-source-component";
 import TransactionStatusComponent from "@/components/transaction-status-component";
 import { tokenList } from "@/lib/tokenList";
-import { chainList } from "@/lib/chainList";
+import { chainList, type ChainIdentifier } from "@/lib/chainList";
 
 export default function SwapComponent() {
   // detect desktop device
@@ -96,6 +96,9 @@ export default function SwapComponent() {
     },
   });
 
+  // open and close state for chainDialog
+  const [chainDialogOpen, setChainDialogOpen] = useState(false);
+
   // open and close state for tokenInDialog
   const [tokenInDialogOpen, setTokenInDialogOpen] = useState(false);
 
@@ -110,7 +113,10 @@ export default function SwapComponent() {
       functionName: "balanceOf",
       args: [address as Address],
       query: {
-        enabled: !!form.state.values.tokenIn && form.state.values.tokenIn.split(":")[0] !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        enabled:
+          !!form.state.values.tokenIn &&
+          form.state.values.tokenIn.split(":")[0] !==
+            "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
       },
     });
 
@@ -122,7 +128,10 @@ export default function SwapComponent() {
       functionName: "balanceOf",
       args: [address as Address],
       query: {
-        enabled: !!form.state.values.tokenOut && form.state.values.tokenOut.split(":")[0] !== "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+        enabled:
+          !!form.state.values.tokenOut &&
+          form.state.values.tokenOut.split(":")[0] !==
+            "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
       },
     });
 
@@ -197,7 +206,7 @@ export default function SwapComponent() {
                   </Button>
                 </div>
               )}
-              <form.Field
+              {/* <form.Field
                 name="chain"
                 validators={{
                   onChange: ({ value }) =>
@@ -238,6 +247,88 @@ export default function SwapComponent() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <SelectFieldInfo field={field} />
+                  </div>
+                )}
+              </form.Field> */}
+              <form.Field
+                name="chain"
+                validators={{
+                  onChange: ({ value }) =>
+                    !value
+                      ? "Please select a chain"
+                      : !chainList.includes(value as ChainIdentifier)
+                      ? "Invalid chain"
+                      : undefined,
+                }}
+              >
+                {(field) => (
+                  <div className="flex flex-col gap-2">
+                    <Dialog
+                      open={chainDialogOpen}
+                      onOpenChange={setChainDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="rounded-none hover:cursor-pointer"
+                        >
+                          <form.Subscribe
+                            selector={(state) => [state.values.chain]}
+                          >
+                            {(
+                              chain // eslint-disable-line @typescript-eslint/no-unused-vars
+                            ) => (
+                              <div className="flex flex-row gap-2 items-center">
+                                {form.state.values.chain.split(":")[2]
+                                  ? form.state.values.chain.split(":")[2]
+                                  : "Select chain"}
+                                {isSwitchChainPending && (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                )}
+                              </div>
+                            )}
+                          </form.Subscribe>
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[800px] rounded-none border-primary">
+                        <DialogHeader>
+                          <DialogTitle>Select a chain</DialogTitle>
+                          <DialogDescription>
+                            Search and select a chain to swap on
+                          </DialogDescription>
+                        </DialogHeader>
+                        {chainList.map((chain) => (
+                          <button
+                            key={chain}
+                            className="flex flex-col gap-2 hover:cursor-pointer hover:bg-primary hover:text-secondary w-full text-left p-2"
+                            onClick={() => {
+                              switchChain(
+                                { chainId: parseInt(chain.split(":")[0]) },
+                                {
+                                  onSuccess: () => {
+                                    field.handleChange(chain);
+                                    setChainDialogOpen(false);
+                                  },
+                                }
+                              );
+                            }}
+                          >
+                            <p>{chain.split(":")[2]}</p>
+                          </button>
+                        ))}
+                        <DialogFooter>
+                          <DialogClose asChild>
+                            <Button
+                              className="rounded-none hover:cursor-pointer"
+                              variant="outline"
+                            >
+                              Cancel
+                            </Button>
+                          </DialogClose>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                     <SelectFieldInfo field={field} />
                   </div>
                 )}
@@ -568,7 +659,7 @@ export default function SwapComponent() {
                               : "--"}
                           </div>
                         </div>
-                        <FieldInfo field={field} />
+                        <TokenOutFieldInfo field={field} />
                       </div>
                     )}
                   </form.Field>
@@ -868,6 +959,20 @@ function FieldInfo({ field }: { field: AnyFieldApi }) {
         <em className="text-green-500">ok!</em>
       )}
       {field.state.meta.isValidating ? "Validating..." : null}
+    </>
+  );
+}
+
+function TokenOutFieldInfo({ field }: { field: AnyFieldApi }) {
+  return (
+    <>
+      {!field.state.meta.isTouched ? (
+        <em>Please select a token</em>
+      ) : field.state.meta.isTouched && !field.state.meta.isValid ? (
+        <em className="text-red-400">{field.state.meta.errors.join(",")}</em>
+      ) : (
+        <em className="text-green-500">ok!</em>
+      )}
     </>
   );
 }
