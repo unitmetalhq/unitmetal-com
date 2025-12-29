@@ -61,6 +61,17 @@ export default function SwapComponent() {
     }
   );
 
+  type FormMeta = {
+    submitAction: "approve-unlimited" | "approve-exact" | "swap" | null
+  }
+
+  // Metadata is not required to call form.handleSubmit().
+  // Specify what values to use as default if no meta is passed
+  const defaultMeta: FormMeta = {
+    submitAction: null,
+  }
+
+
   // form to handle the swap
   const form = useForm({
     // default values for the form
@@ -87,8 +98,17 @@ export default function SwapComponent() {
       },
       onChangeDebounceMs: 500,
     },
-    onSubmit: async ({ value }) => {
-      console.log(value);
+    // Define what meta values to expect on submission
+    onSubmitMeta: defaultMeta,
+    onSubmit: async ({ value, meta }) => {
+      // Do something with the values passed via handleSubmit
+      if (meta.submitAction === "approve-unlimited") {
+        console.log("approve unlimited");
+      } else if (meta.submitAction === "approve-exact") {
+        console.log("approve exact");
+      } else if (meta.submitAction === "swap") {
+        console.log("swap", value);
+      }
     },
   });
 
@@ -814,6 +834,7 @@ export default function SwapComponent() {
                         className="hover:cursor-pointer font-bold rounded-none text-sm col-span-2"
                         type="submit"
                         disabled={!canSubmit || isSubmitting}
+                        onClick={() => form.handleSubmit({ submitAction: "approve-unlimited" })}
                       >
                         {isSubmitting ? (
                           <>
@@ -828,6 +849,7 @@ export default function SwapComponent() {
                         className="hover:cursor-pointer font-bold rounded-none text-sm col-span-2"
                         type="submit"
                         disabled={!canSubmit || isSubmitting}
+                        onClick={() => form.handleSubmit({ submitAction: "approve-exact" })}
                       >
                         {isSubmitting ? (
                           <>
@@ -859,6 +881,7 @@ export default function SwapComponent() {
                     className="hover:cursor-pointer text-lg font-bold rounded-none col-span-4"
                     type="submit"
                     disabled={!canSubmit || isSubmitting}
+                    onClick={() => form.handleSubmit({ submitAction: "swap" })}
                   >
                     {isSubmitting ? (
                       <>
