@@ -18,6 +18,11 @@ export default function Home() {
       name: 'Learn more about DeFi',
       url: '/learn'
     },
+    {
+      id: 4,
+      name: 'ETH Price',
+      url: '/eth'
+    },
   ];
 
   const keyboardNavItems = [
@@ -35,6 +40,11 @@ export default function Home() {
       keyboard: '3',
       description: 'Sections',
       url: '/learn'
+    },
+    {
+      keyboard: '4',
+      description: 'Sections',
+      url: '/eth'
     },
   ];
 
