@@ -1,52 +1,60 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function chainIdToChainName(chainId: number) {
   switch (chainId) {
     case 1:
-      return "Ethereum"
+      return "Ethereum";
     case 137:
-      return "Polygon"
+      return "Polygon";
     case 42161:
-      return "Arbitrum"
+      return "Arbitrum";
     case 8453:
-      return "Base"
+      return "Base";
     case 130:
-      return "Unichain"
+      return "Unichain";
     case 10:
-      return "Optimism"
+      return "Optimism";
     case 43114:
-      return "Avalanche"
+      return "Avalanche";
     case 56:
-      return "BNB Chain"
+      return "BNB Chain";
     case 324:
-      return "ZKSync"
+      return "ZKSync";
     case 250:
-      return "Fantom"
+      return "Fantom";
     case 59144:
-      return "Linea"
+      return "Linea";
     case 534352:
-      return "Scroll"
+      return "Scroll";
     case 5000:
-      return "Mantle"
+      return "Mantle";
     case 81457:
-      return "Blast"
+      return "Blast";
     case 146:
-      return "Sonic"
+      return "Sonic";
     case 80094:
-      return "Berachain"
+      return "Berachain";
     case 2020:
-      return "Ronin"
+      return "Ronin";
     default:
-      return "Unknown"
+      return "Unknown";
   }
 }
 
 export function parseUsdAmount(amount: string) {
+  const numAmount = Number(amount);
+  // if amount is less than 1 cent, display <$0.01
+  if (numAmount > 0 && numAmount < 0.01) {
+    return "<$0.01";
+  }
   // use locale to format the amount
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(amount));
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(numAmount);
 }

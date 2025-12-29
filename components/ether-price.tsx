@@ -1,10 +1,11 @@
 "use client";
-import { useReadContract } from "wagmi";
+import { useReadContract, useGasPrice } from "wagmi";
 import { checkTheChainAbi } from "@/lib/abis/CheckTheChain";
 import { BuildSkeleton } from "@/components/build-ui/build-skeleton";
 import { parseUsdAmount } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Loader2 } from "lucide-react";
+import { formatUnits } from "viem";
 
 export default function EtherPrice() {
   const {
@@ -17,6 +18,15 @@ export default function EtherPrice() {
     abi: checkTheChainAbi, // CheckTheChain contract abi
     functionName: "checkPrice", // checkPrice function
     args: ["0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"], // WETH address
+    chainId: 1,
+  });
+
+  const {
+    data: gasPrice,
+    isLoading: isLoadingGasPrice,
+    refetch: refetchGasPrice,
+    isRefetching: isRefetchingGasPrice,
+  } = useGasPrice({
     chainId: 1,
   });
 
@@ -46,6 +56,46 @@ export default function EtherPrice() {
             <RefreshCcw className="w-4 h-4" />
           )}
         </Button>
+      </div>
+      <div className="flex flex-col gap-2 px-4 py-2 border-t-2 border-primary border-dotted">
+        <p className="underline underline-offset-4">Gas</p>
+        <div className="flex flex-row items-center justify-between gap-2">
+          {isLoadingGasPrice ? (
+            <BuildSkeleton className="w-16 h-6" />
+          ) : (
+            <p>
+              {formatUnits(gasPrice ?? BigInt(0), 9)}{" "}
+              <span className="text-muted-foreground">
+              ({parseUsdAmount(
+                (
+                  Number(formatUnits(gasPrice ?? BigInt(0), 18)) *
+                  Number(price?.[1] ?? "0")
+                ).toString()
+              )})
+              </span>
+              {" "}
+              gwei
+            </p>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => refetchGasPrice()}
+            disabled={isRefetchingGasPrice}
+            className="hover:cursor-pointer rounded-none"
+          >
+            {isRefetchingGasPrice ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="w-4 h-4" />
+            )}
+          </Button>
+        </div>
+      </div>
+      <div className="px-4 py-2 flex flex-col items-center border-t-2 border-primary border-dotted">
+        <p className="text-sm text-muted-foreground">
+          Onchain data from Ethereum
+        </p>
       </div>
     </div>
   );
