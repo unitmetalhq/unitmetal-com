@@ -1,4 +1,3 @@
-import Script from 'next/script';
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
@@ -46,11 +45,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <Script
-        defer
-        src="https://analytics.zxstim.com/script.js"
-        data-website-id="4c5f4181-315b-416b-9e01-99d2f80e822b"
-      />
       <body
         className={jetBrainsMono.className}
       >
