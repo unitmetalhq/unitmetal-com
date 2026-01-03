@@ -26,14 +26,14 @@ export default function Footer() {
                   Go to X account <ExternalLink className="w-4 h-4" />
                 </a>
               </Button>
-              <a
+              {/* <Link
                 className="flex flex-row gap-2 items-center underline underline-offset-2"
                 target="blank"
-                href="https://t.me/unitmetalhq"
+                href="/"
               >
                 <Rss className="w-4 h-4" />
-                Telegram Channel
-              </a>
+                Blog
+              </Link> */}
             </div>
           </div>
           <div className="border border-primary p-10 grow">
@@ -45,26 +45,18 @@ export default function Footer() {
                 <h3 className="scroll-m-20 text-lg font-semibold tracking-tight mb-2">
                   Team
                 </h3>
-                <Link href="/about" className="text-muted-foreground text-sm">
+                <Link href="/" className="text-muted-foreground text-sm">
                   About
                 </Link>
-                {/* <Link href="/treasury" className="text-muted-foreground text-sm">Treasury</Link>
-                <Link href="/contributors" className="text-muted-foreground text-sm">Contributors</Link> */}
               </div>
               <div className="flex flex-col gap-1">
                 <h3 className="scroll-m-20 text-lg font-semibold tracking-tight mb-2">
                   Legal
                 </h3>
-                <Link href="/privacy" className="text-muted-foreground text-sm">
+                <Link href="/" className="text-muted-foreground text-sm">
                   Privacy policy
                 </Link>
-                {/* <Link href="/community-rules" className="text-muted-foreground text-sm">Community rules</Link> */}
               </div>
-              {/* <div className="flex flex-col gap-1">
-                <h3 className="scroll-m-20 text-lg font-semibold tracking-tight mb-2">Job board</h3>
-                <Link href="/core" className="text-muted-foreground text-sm">Core</Link>
-                <Link href="/form-a-team" className="text-muted-foreground text-sm">Form a team</Link>
-              </div> */}
             </div>
           </div>
         </div>
@@ -78,13 +70,6 @@ export default function Footer() {
               feel free to reach out to us.
             </p>
             <div className="flex flex-col gap-4">
-              <a
-                className="flex flex-row gap-2 items-center dark:text-blue-400 text-blue-500 underline underline-offset-4 w-fit"
-                href="mailto:root@zxstim.com"
-                target="_blank"
-              >
-                Email root@zxstim.com <ExternalLink className="w-4 h-4" />
-              </a>
               <a
                 className="flex flex-row gap-2 items-center dark:text-blue-400 text-blue-500 underline underline-offset-4 w-fit"
                 href="https://github.com/unitmetalhq"
