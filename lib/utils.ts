@@ -58,3 +58,11 @@ export function parseUsdAmount(amount: string) {
     currency: "USD",
   }).format(numAmount);
 }
+
+export function formatUsdAmount(amount: string) {
+  const numAmount = Number(amount);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(numAmount);
+}

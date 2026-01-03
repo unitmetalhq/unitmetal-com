@@ -1,75 +1,88 @@
 import TerminalMenu from "@/components/terminal-menu";
 import KeyboardNav from "@/components/keyboard-nav";
+import OnchainTokenPriceList from "@/components/onchain-token-price-list";
 
 export default function Home() {
   const menuItems = [
     {
       id: 1,
-      name: 'Swap',
-      url: '/swap'
+      name: "Swap",
+      url: "/swap",
     },
     {
       id: 2,
-      name: 'Explore yield',
-      url: '/explore'
+      name: "Explore yield",
+      url: "/explore",
     },
     {
       id: 3,
-      name: 'Learn more about DeFi',
-      url: '/learn'
+      name: "Learn more about DeFi",
+      url: "/learn",
     },
     {
       id: 4,
-      name: 'ETH Price',
-      url: '/eth'
+      name: "ETH Price",
+      url: "/eth",
     },
   ];
 
   const keyboardNavItems = [
     {
-      keyboard: '1',
-      description: 'Sections',
-      url: '/swap'
+      keyboard: "1",
+      description: "Sections",
+      url: "/swap",
     },
     {
-      keyboard: '2',
-      description: 'Sections',
-      url: '/explore'
+      keyboard: "2",
+      description: "Sections",
+      url: "/explore",
     },
     {
-      keyboard: '3',
-      description: 'Sections',
-      url: '/learn'
+      keyboard: "3",
+      description: "Sections",
+      url: "/learn",
     },
     {
-      keyboard: '4',
-      description: 'Sections',
-      url: '/eth'
+      keyboard: "4",
+      description: "Sections",
+      url: "/eth",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0">
-      <div className="flex flex-col gap-4 w-full md:w-5/6 text-left">
-        <div className="flex flex-row gap-2 items-center">
-          <span className="text-sm bg-primary text-secondary font-bold px-2 py-1">00.</span>
-          <h1 className="text-md font-bold">Index</h1>
+    <div className="flex flex-col gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-0">
+        <div className="flex flex-col gap-4 w-full md:w-5/6 text-left">
+          <div className="flex flex-row gap-2 items-center">
+            <span className="text-sm bg-primary text-secondary font-bold px-2 py-1">
+              00.
+            </span>
+            <h1 className="text-md font-bold">Index</h1>
+          </div>
+          <h1 className="text-xl md:text-3xl font-bold">
+            Professional Interface for DeFi
+          </h1>
+          <div className="flex flex-col gap-12 mt-4">
+            <p className="text-md">
+              High quality, open source interface for DeFi users. Swap, provide
+              liquidity and explore yield opportunities.
+            </p>
+          </div>
         </div>
-        <h1 className="text-xl md:text-3xl font-bold">Professional Interface for DeFi</h1>
-        <div className="flex flex-col gap-12 mt-4">
-          <p className="text-md">High quality, open source interface for DeFi users. Swap, provide liquidity and explore yield opportunities.</p>
+        <div className="flex flex-col border-2 border-primary gap-2 pb-8">
+          <div className="flex flex-row justify-between items-center bg-primary text-secondary p-2">
+            <h1 className="text-lg md:text-xl font-bold">Navigate</h1>
+            <p className="text-md">_</p>
+          </div>
+          <div className="flex flex-col px-4 py-2">
+            <TerminalMenu menuItems={menuItems} />
+          </div>
         </div>
+        <KeyboardNav keyboardNavItems={keyboardNavItems} />
       </div>
-      <div className="flex flex-col border-2 border-primary gap-2 pb-8">
-        <div className="flex flex-row justify-between items-center bg-primary text-secondary p-2">
-          <h1 className="text-lg md:text-xl font-bold">Navigate</h1>
-          <p className="text-md">_</p>
-        </div>
-        <div className="flex flex-col px-4 py-2">
-          <TerminalMenu menuItems={menuItems} />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <OnchainTokenPriceList />
       </div>
-      <KeyboardNav keyboardNavItems={keyboardNavItems} />
     </div>
   );
 }
