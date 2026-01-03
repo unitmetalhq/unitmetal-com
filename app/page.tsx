@@ -1,53 +1,54 @@
-import TerminalMenu from "@/components/terminal-menu";
-import KeyboardNav from "@/components/keyboard-nav";
+// import TerminalMenu from "@/components/terminal-menu";
+// import KeyboardNav from "@/components/keyboard-nav";
 import OnchainTokenPriceList from "@/components/onchain-token-price-list";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
-  const menuItems = [
-    {
-      id: 1,
-      name: "Swap",
-      url: "/swap",
-    },
-    {
-      id: 2,
-      name: "Explore yield",
-      url: "/explore",
-    },
-    {
-      id: 3,
-      name: "Learn more about DeFi",
-      url: "/learn",
-    },
-    {
-      id: 4,
-      name: "ETH Price",
-      url: "/eth",
-    },
-  ];
+  // const menuItems = [
+  //   {
+  //     id: 1,
+  //     name: "Swap",
+  //     url: "/swap",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Explore yield",
+  //     url: "/explore",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Learn more about DeFi",
+  //     url: "/learn",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "ETH Price",
+  //     url: "/eth",
+  //   },
+  // ];
 
-  const keyboardNavItems = [
-    {
-      keyboard: "1",
-      description: "Sections",
-      url: "/swap",
-    },
-    {
-      keyboard: "2",
-      description: "Sections",
-      url: "/explore",
-    },
-    {
-      keyboard: "3",
-      description: "Sections",
-      url: "/learn",
-    },
-    {
-      keyboard: "4",
-      description: "Sections",
-      url: "/eth",
-    },
-  ];
+  // const keyboardNavItems = [
+  //   {
+  //     keyboard: "1",
+  //     description: "Sections",
+  //     url: "/swap",
+  //   },
+  //   {
+  //     keyboard: "2",
+  //     description: "Sections",
+  //     url: "/explore",
+  //   },
+  //   {
+  //     keyboard: "3",
+  //     description: "Sections",
+  //     url: "/learn",
+  //   },
+  //   {
+  //     keyboard: "4",
+  //     description: "Sections",
+  //     url: "/eth",
+  //   },
+  // ];
 
   return (
     <div className="flex flex-col gap-8">
@@ -68,8 +69,11 @@ export default function Home() {
               liquidity and explore yield opportunities.
             </p>
           </div>
+          <div className="flex flex-col gap-2 mt-auto">
+            <Button className="w-fit rounded-none">Coming soon!</Button>
+          </div>
         </div>
-        <div className="flex flex-col border-2 border-primary gap-2 pb-8">
+        {/* <div className="flex flex-col border-2 border-primary gap-2 pb-8">
           <div className="flex flex-row justify-between items-center bg-primary text-secondary p-2">
             <h1 className="text-lg md:text-xl font-bold">Navigate</h1>
             <p className="text-md">_</p>
@@ -77,11 +81,9 @@ export default function Home() {
           <div className="flex flex-col px-4 py-2">
             <TerminalMenu menuItems={menuItems} />
           </div>
-        </div>
-        <KeyboardNav keyboardNavItems={keyboardNavItems} />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </div> */}
         <OnchainTokenPriceList />
+        {/* <KeyboardNav keyboardNavItems={keyboardNavItems} /> */}
       </div>
     </div>
   );

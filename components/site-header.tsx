@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import ThemeToggle from "@/components/theme-toggle";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+// import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function SiteHeader() {
   return (
@@ -17,7 +17,6 @@ export default function SiteHeader() {
       </Link>
       <div className="flex flex-row gap-2">
         <ThemeToggle />
-        <ConnectButton />
       </div>
     </div>
   )
